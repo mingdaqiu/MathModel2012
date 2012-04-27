@@ -219,7 +219,7 @@ sort_func (const void *e1, const void *e2)
 /**
  * sort population by fitness
  */
-inline void
+enline void
 sort_by_fitness (ga_struct * population)
 {
   qsort (population, POPSIZE, sizeof (ga_struct), sort_func);
