@@ -24,3 +24,15 @@ TODO:
 	更好的GA演化算法
 	更好的Bit实现
 I accepted and Willing to follow Mingda Qiu\'s lead cat README cat README  -- Lv Ding
+
+
+-------------------------
+
+简单处理一下分工的问题：
+
+主要任务分两个部分
+
+	- GA算法的实现
+		- 邱铭达先争取做这一部分的优化
+	- 曲线拟合的fitness计算&程序编写
+		- 吕一鼎去找文献, 设计算法
