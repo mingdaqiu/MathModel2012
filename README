@@ -23,8 +23,6 @@
 TODO:
 	更好的GA演化算法
 	更好的Bit实现
-I accepted and Willing to follow Mingda Qiu\'s lead cat README cat README  -- Lv Ding
-
 
 -------------------------
 
@@ -36,3 +34,21 @@ I accepted and Willing to follow Mingda Qiu\'s lead cat README cat README  -- Lv
 		- 邱铭达先争取做这一部分的优化
 	- 曲线拟合的fitness计算&程序编写
 		- 吕一鼎去找文献, 设计算法
+	- 常微分方程的数值解与做图
+		- 目前是采用GSL库
+
+-------------------------
+
+文件说明：
+	
+- ga_sin.c
+	一个测试的GA算法实现
+
+- gsl_test.c
+	测试GSL库是否正确安装在系统上
+
+- simple_ode.c
+	一个简单的用gsl做微分方程数值解的demo
+
+- Makefile
+	用make编译

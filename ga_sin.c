@@ -9,17 +9,17 @@
 #include <memory.h>
 #include <math.h>
 
-#ifndef uint
-typedef unsigned int uint;
-#define UINT_BITSIZE 8*sizeof(uint)
+#ifndef ushort
+typedef unsigned short int ushort;
+#define UINT_BITSIZE 8*sizeof(ushort)
 #endif
 
 // Problem specific arguments
 #define ARGLEN		3 // three parameters
 #define ARGACC		3 // accuracy
-#define ARGMAX		0xffff	
-#define ARGMIN		-0xffff
-#define POP_SIZE	0x60	
+#define ARGMAX		0xff	
+#define ARGMIN		-0xff
+#define POP_SIZE	0x20	
 #define ARGSCALE	0.01
 
 
@@ -29,9 +29,9 @@ typedef unsigned int uint;
 
 typedef struct tagGenome
 {
-	double	fitness;
-	uint *	genome;
-	int		generation;
+	double		fitness;
+	ushort *	genome;
+	int			generation;
 } Genome;
 
 typedef struct tagDataPoints
@@ -41,7 +41,7 @@ typedef struct tagDataPoints
 	int size;
 } DataPoints;
 
-void debug_print_genome(FILE * fOut, uint * genome)
+void debug_print_genome(FILE * fOut, ushort * genome)
 {
 	int i,k;	
 	char map[3] = {'A', 'B', 'C'};
@@ -52,7 +52,7 @@ void debug_print_genome(FILE * fOut, uint * genome)
 		{
 			fprintf(fOut, "%d", (genome[k] >> i) & 0x01u);
 		}
-		fprintf(fOut, "\n");
+		fprintf(fOut, "\t%3.2lf\n", ((short)genome[k])*ARGSCALE);
 	}
 }
 
@@ -63,13 +63,14 @@ void debug_print_genome(FILE * fOut, uint * genome)
  */
 double target_function(double x, double A, double B, double C)
 {
-	return A*sin(B*x + C);
+	//return A*sin(B*x + C);
+	return A*x*x +B*x + C;
 }
 
 void genome_translator(Genome * genome, double * pA, double * pB, double * pC)
 {
-	int *p;
-	p = (int*)(genome->genome);
+	short *p;
+	p = (short*)(genome->genome);
 	*pA = p[0]*ARGSCALE;
 	*pB = p[1]*ARGSCALE;
 	*pC = p[2]*ARGSCALE;
@@ -112,6 +113,7 @@ void cal_fitness(Genome * population, DataPoints * pdp)
 		//}
 		//fprintf(stderr, "\n");
 		population[i].fitness = fitarr[pdp->size-1];
+		//population[i].fitness *= B*B + 1;
 	}
 	free(fitarr);
 }
@@ -124,11 +126,11 @@ void init_population(Genome * population, Genome * beta_population)
 	int i,k, tmp;
 	int * p;
 	size_t alloc_size;
-	alloc_size = (ARGLEN) * sizeof(uint);
+	alloc_size = (ARGLEN) * sizeof(ushort);
 	for(i = 0; i < POP_SIZE; i++)
 	{
 		population[i].fitness = 0;
-		population[i].genome = (uint *)malloc(alloc_size);
+		population[i].genome = (ushort *)malloc(alloc_size);
 		memset(population[i].genome, 0, alloc_size);
 
 		p = (int*)(population[i].genome);
@@ -139,7 +141,7 @@ void init_population(Genome * population, Genome * beta_population)
 		
 
 		beta_population[i].fitness = 0;
-		beta_population[i].genome = (uint *)malloc(alloc_size);
+		beta_population[i].genome = (ushort *)malloc(alloc_size);
 		memset(beta_population[i].genome, 0, alloc_size);
 	}
 }
@@ -156,7 +158,7 @@ void elitism(Genome * population, Genome * beta_population, int esize)
 	for(i = 0; i < esize; i++)
 	{
 		memcpy(beta_population[i].genome, population[i].genome,
-			sizeof(uint)*ARGLEN);
+			sizeof(ushort) * (ARGLEN));
 	}
 }
 
@@ -191,17 +193,17 @@ void mate(Genome * population, Genome * beta_population)
 {
 
 	////
-	int m, i, k, i1,i2,pos,tsize;
+	int m, i, k, i1,i2,pos;
 	int esize;
 
-	uint tmp;
-	m = esize;
+	ushort tmp;
+	//m = esize;
 	i1 = -1;
 	i2 = -1;
 	pos = -1;
 	esize = POP_SIZE * ELITRATE;
-	//tsize = sizeof(uint);
 
+	//fprintf(stderr, "esize=%d\n", esize);
 	elitism(population, beta_population, esize);
 
 
@@ -243,7 +245,6 @@ void mate(Genome * population, Genome * beta_population)
 
 }
 
-
 //////////////////////
 int sort_func(const void * e1, const void * e2)
 {
@@ -264,12 +265,12 @@ int main(int argc, char ** argv)
 	int * p;
 	int generation;
 
-	int x[] = {0, 10, 20};
-	int y[] = {0, 10, 0};
+	int x[] = {0, 10, 20, 30};
+	int y[] = {0, 10, 0, -10};
 	DataPoints dp;
 	dp.x = x;
 	dp.y = y;
-	dp.size = 3;
+	dp.size = 4;
 	Genome * ptmp;
 
 
@@ -283,7 +284,7 @@ int main(int argc, char ** argv)
 
 	init_population(population,beta_population);
 
-	for(generation = 0; generation < 1000; generation++)
+	for(generation = 0; generation < 10; generation++)
 	{
 		fprintf(stderr, "Generation %d\n", generation);
 		cal_fitness(population, &dp);
@@ -291,7 +292,7 @@ int main(int argc, char ** argv)
 
 		// display
 		i = 0;
-		//for(i = 0; i < POP_SIZE; i ++)
+		//for(i = 0; i < POP_SIZE; i++)
 		{
 			fprintf(stderr, "Geneation %d\tGenome %d\n", generation, i);
 
@@ -301,11 +302,28 @@ int main(int argc, char ** argv)
 			fprintf(stderr, "\t\t...Fitness: %lf\n", 
 				population[i].fitness);
 		}
+
 		mate(population, beta_population);
+		/*
+		i = 0;
+		for(i = 0; i < POP_SIZE; i++)
+		{
+			fprintf(stderr, "beta population \t Genome %d\n",  i);
+			debug_print_genome(stderr, beta_population[i].genome);
+		}
+		*/
 		// Swap
 		ptmp = population;
 		population = beta_population;
 		beta_population = ptmp;
+		//memset(beta_population, 0, sizeof(Genome)*POP_SIZE);
+		/*
+		for(i = 0; i < POP_SIZE; i++)
+		{
+			memset(beta_population[i].genome, 0, sizeof(ushort)*ARGLEN);
+			beta_population[i].fitness=0;
+		}
+		*/
 	}
 
 	return 0;
