@@ -35,6 +35,6 @@ int main(int argc, char ** argv)
 		ti = (te - t)*i/100 + t;	
 		rlc_solver(ti, t, y, result, params);
 
-		fprintf(stdout, "%.5e %.5e %.5e\n", ti, result[0], result[1]);
+		fprintf(stdout, "%.5f %.5f %.5f\n", ti, result[0], result[1]);
 	}
 }

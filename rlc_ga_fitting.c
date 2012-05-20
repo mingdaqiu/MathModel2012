@@ -6,6 +6,8 @@
 
 #include "rlc_solver.h"
 
+#include "double_array.h"
+
 
 #ifndef ushort
 typedef unsigned short int ushort;
@@ -18,10 +20,10 @@ typedef unsigned short int ushort;
 #define ARGMAX		0x0f	
 #define ARGMIN		0x00
 #define POP_SIZE	0x20	
-double ARGSCALE[3] = {0.1, 0.01, 0.01};
+double ARGSCALE[3] = {1, 0.01, 0.01};
 
 #define ELITRATE	0.1
-#define MUTATIONRATE 0.25
+#define MUTATIONRATE 0.5
 #define MUTATION	RAND_MAX * MUTATIONRATE
 
 typedef struct tagGenome
@@ -49,7 +51,7 @@ void debug_print_genome(FILE * fOut, ushort * genome)
 		{
 			fprintf(fOut, "%d", (genome[k] >> i) & 0x01u);
 		}
-		fprintf(fOut, "\t%3.2lf\n", (genome[k]*ARGSCALE[i]));
+		fprintf(fOut, "\t%3.2lf\n", (genome[k]*ARGSCALE[k]));
 	}
 }
 
@@ -125,28 +127,34 @@ void cal_fitness(Genome * population, DataPoints * pdp, double * params_given)
 	double params_genome[ARGLEN];
 	int i,j,k;
 	double * fitarr;
+	double sum = 0;
 	fitarr = (double*)malloc(pdp->size * sizeof(double));
 
 	for(i = 0; i < POP_SIZE; i++)
 	{
+		sum = 0;
+
 		population[i].fitness = 0;
 		memset(params_genome, 0, sizeof(double)*ARGLEN);
 		genome_translator(population+i, params_genome);
 		memset(fitarr, 0, pdp->size * sizeof(double));
 		for(k = 0; k < pdp->size; k++)
 		{
-			fitarr[k] = square(pdp->y[k] - target_function(pdp->x[k], params_given, params_genome));
+			//fitarr[k] = square(pdp->y[k] - target_function(pdp->x[k], params_given, params_genome));
+			sum += square(pdp->y[k] - target_function(pdp->x[k], params_given, params_genome));
 			//fprintf(stderr, "A,B,C=%.3lf %.3lf %.3lf;x=%d; delta=%.3lf\n", A,B,C, pdp->x[k],
 		//		fitarr[k]);
 		}
-		qsort(fitarr, pdp->size, sizeof(double), sort_double_func);
+		//qsort(fitarr, pdp->size, sizeof(double), sort_double_func);
 		//fprintf(stderr, "\nfitarr %.3lf %.3lf %.3lf: ", A, B, C);
 		//for(j = 0; j < pdp->size; j++)
 		//{
 			//fprintf(stderr, "%lf ", fitarr[j]);
 		//}
 		//fprintf(stderr, "\n");
-		population[i].fitness = fitarr[pdp->size-1];
+		//population[i].fitness = fitarr[pdp->size/2];
+		population[i].fitness = sum;
+
 		//population[i].fitness *= B*B + 1;
 	}
 	free(fitarr);
@@ -209,7 +217,7 @@ void mutate(Genome * member)
 	int * p;
 
 	//tsize = 8;
-	nom = rand() % 6;
+	nom = rand() % 6 + 1;
 	for(i = 0; i < nom; i++)
 	{
 		apos = rand()%BYTE_SIZE;	
@@ -320,24 +328,48 @@ int main(int argc, char ** argv)
 	double params_genome[3];
 	// temp pointer for swap operation
 	Genome * ptmp;
+	int n;
+
+	DataPoints dp;
+	DoubleArray da_x;
+	DoubleArray da_y;
+	double x,y,z;
 
 	double E, R, L, C;
 
-	// Read Data
-	// and initialize dp
-	DataPoints dp;
-	dp.x = (double*)malloc(sizeof(double)*15);
-	dp.y = (double*)malloc(sizeof(double)*15);
-	dp.size = 15;
-	//dp.x = x;
-	//dp.y = y;
-	//dp.size = 4;
-	for(i = 0; i < 15;i++)
+	// Read Data into DataPoints
+	if(argc > 1)
+		fData  = fopen(argv[1], "r");
+	else
+		fData = fopen("data","r");
+
+	assert(fData != NULL);
+
+	DoubleArray_Initialize(&da_x);
+	DoubleArray_Initialize(&da_y);
+	fprintf(stderr, "Begin Reading Process\n");
+	while(1)
 	{
-		dp.x[i] =init_data[3*i];
-		dp.y[i] =init_data[3*i+1];
+		n = fscanf(fData, "%lf %lf %lf\n", &x, &y, &z);
+		if(n < 3)
+			break;
+		DoubleArray_Insert(&da_x, x);
+		DoubleArray_Insert(&da_y, y);
 	}
 
+	assert(da_x.length == da_y.length);
+	dp.size = da_x.length;
+	dp.x = (double*)malloc(sizeof(double)*dp.size);
+	dp.y = (double*)malloc(sizeof(double)*dp.size);
+	memcpy(dp.x, da_x.data, dp.size * sizeof(double));
+	memcpy(dp.y, da_y.data, dp.size * sizeof(double));
+
+
+	
+	//for(i = 0; i < dp.size;i++)
+	//{
+		//fprintf(stdout, "point: %lf %lf\n", dp.x[i], dp.y[i]);
+	//}
 
 	// init E
 	E = 10.0;
@@ -353,7 +385,7 @@ int main(int argc, char ** argv)
 
 	init_population(population,beta_population);
 
-	for(generation = 0; generation < 10; generation++)
+	for(generation = 0; generation < 100; generation++)
 	{
 		fprintf(stderr, "Generation %d\n", generation);
 		cal_fitness(population, &dp, params_given);
@@ -361,8 +393,9 @@ int main(int argc, char ** argv)
 		sort_by_fitness(population);
 
 		// display
-		i = 0;
+		//i = 0;
 		//for(i = 0; i < POP_SIZE; i++)
+		for(i = 0; i < POP_SIZE/8; i++)
 		{
 			fprintf(stderr, "Geneation %d\tGenome %d\n", generation, i);
 
@@ -371,8 +404,8 @@ int main(int argc, char ** argv)
 			R = params_genome[0];
 			L = params_genome[1];
 			C = params_genome[2];
-			fprintf(stderr, "%02d: %.5lf, %.5lf, %.5lf", i, R,L,C);	
-			//debug_print_genome(stderr, population[i].genome);
+			//fprintf(stderr, "%02d: %.5lf, %.5lf, %.5lf", i, R,L,C);	
+			debug_print_genome(stderr, population[i].genome);
 			fprintf(stderr, "\t\t...Fitness: %lf\n", 
 				population[i].fitness);
 		}

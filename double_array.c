@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 
 #include "double_array.h"
 
@@ -11,30 +12,36 @@ void DoubleArray_Initialize(DoubleArray * pda)
     p->size = DOUBLEARRAY_DEF_INIT_SIZE;
     p->data = (double*)malloc(p->size * sizeof(double));
 	assert(p->data != NULL);
-    memset(p->data, 0, p->size * sizeof(double));
+    memset((void*)(p->data), 0, p->size * sizeof(double));
 }
 
 DoubleArray * DoubleArray_Insert(DoubleArray * p, double n)
 {
     double *q;
-    if (p->length<p->size) {
-        p->data[p->length]=n;
-        ++p->length;
-    }
-    else
+	// Longer
+	while(p->length >= p->size)
 	{
-        q = (double*)realloc(p->data, 
-			(p->size + DOUBLEARRAY_DEF_DELTA_SIZE)*sizeof(double));
+		q = (double*)malloc(
+			(p->size + DOUBLEARRAY_DEF_DELTA_SIZE) 
+				* sizeof(double));
         if (q != NULL) 
 		{
+			memcpy(q, p->data, p->size*sizeof(double));
+			free(p->data);
             p->data = q;
-            free(q);
         }
-        else return NULL;
+        else 
+		{
+			fprintf(stderr, "Run out of memory\n");
+			return NULL;
+		}
+
         p->size+=DOUBLEARRAY_DEF_DELTA_SIZE;
-        p->data[p->length]=n;
-        ++(p->length);
-    }
+	}
+
+	p->data[p->length]=n;
+	++(p->length);
+
     return p;
 }
 

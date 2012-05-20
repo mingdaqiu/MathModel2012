@@ -1,18 +1,14 @@
-all:
+all:rlc_ga_main rlc_solver_main
 	touch all
 
-scae:simple_c_genetic_algorithm_example.c
-	cc simple_c_genetic_algorithm_example.c -o scae
+rlc_solver_main_dep=$(wildcard rlc_solver*.*)
 
-ga_sin:ga_sin.c
-	cc ga_sin.c -lm -o ga_sin
+rlc_solver_main:$(rlc_solver_main_dep)
+	cc -lgsl -lgslcblas rlc_solver.c rlc_solver_main.c -Wl,--rpath -Wl,/usr/local/lib -o rlc_solver_main
 
-gsl_test:gsl_test.c
-	cc -lgsl -lgslcblas gsl_test.c -Wl,--rpath -Wl,/usr/local/lib -o gsl_test
 
-gsl_test_odeiv2:gsl_test_odeiv2.c
-	cc -lgsl -lgslcblas gsl_test_odeiv2.c -Wl,--rpath -Wl,/usr/local/lib -o gsl_test_odeiv2
-simple_ode:simple_ode.c
-	cc -lgsl -lgslcblas simple_ode.c -Wl,--rpath -Wl,/usr/local/lib -o simple_ode
-ele_test:ele_test.c
-	cc -lgsl -lgslcblas ele_test.c -Wl,--rpath -Wl,/usr/local/lib -o ele_test
+rlc_ga_main:rlc_ga_fitting.c rlc_solver.c double_array.c
+	cc -lgsl -lgslcblas rlc_solver.c rlc_ga_fitting.c double_array.c -Wl,--rpath -Wl,/usr/local/lib -o rlc_ga_main
+
+double_array_test:double_array_test.c double_array.c double_array.h
+	cc double_array_test.c double_array.c -o double_array_test
