@@ -10,7 +10,7 @@ void DoubleArray_Initialize(DoubleArray * pda)
     p->length = 0;
     p->size = DOUBLEARRAY_DEF_INIT_SIZE;
     p->data = (double*)malloc(p->size * sizeof(double));
-	assert(p->data != NULL)
+	assert(p->data != NULL);
     memset(p->data, 0, p->size * sizeof(double));
 }
 
