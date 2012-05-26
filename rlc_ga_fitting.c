@@ -12,17 +12,17 @@
 #ifndef ushort
 typedef unsigned short int ushort;
 //#define UINT_BITSIZE 8*sizeof(ushort)
-#define BYTE_SIZE	4
+#define BYTE_SIZE	8
 #endif
 
 // Problem specific arguments
 #define ARGLEN		3 // three parameters
 #define ARGMAX		0x0f	
 #define ARGMIN		0x00
-#define POP_SIZE	0x20	
+#define POP_SIZE	200
 double ARGSCALE[3] = {1, 0.01, 0.01};
 
-#define ELITRATE	0.1
+#define ELITRATE	0.01
 #define MUTATIONRATE 0.5
 #define MUTATION	RAND_MAX * MUTATIONRATE
 
@@ -144,6 +144,13 @@ void cal_fitness(Genome * population, DataPoints * pdp, double * params_given)
 			sum += square(pdp->y[k] - target_function(pdp->x[k], params_given, params_genome));
 			//fprintf(stderr, "A,B,C=%.3lf %.3lf %.3lf;x=%d; delta=%.3lf\n", A,B,C, pdp->x[k],
 		//		fitarr[k]);
+		//
+		//
+			if(sum > 1000000)
+			{
+				sum = 1000000;
+				break;
+			}
 		}
 		//qsort(fitarr, pdp->size, sizeof(double), sort_double_func);
 		//fprintf(stderr, "\nfitarr %.3lf %.3lf %.3lf: ", A, B, C);
@@ -217,7 +224,7 @@ void mutate(Genome * member)
 	int * p;
 
 	//tsize = 8;
-	nom = rand() % 6 + 1;
+	nom = rand() % 4 + 4;
 	for(i = 0; i < nom; i++)
 	{
 		apos = rand()%BYTE_SIZE;	
@@ -279,7 +286,7 @@ void mate(Genome * population, Genome * beta_population)
 		}
 
 		// mutation if necessary
-		if(rand() < MUTATION)
+		if(rand() % 2 == 0)
 		{
 			mutate(&beta_population[m]);
 		}
@@ -385,7 +392,7 @@ int main(int argc, char ** argv)
 
 	init_population(population,beta_population);
 
-	for(generation = 0; generation < 100; generation++)
+	for(generation = 0; generation < 200; generation++)
 	{
 		fprintf(stderr, "Generation %d\n", generation);
 		cal_fitness(population, &dp, params_given);
@@ -393,9 +400,9 @@ int main(int argc, char ** argv)
 		sort_by_fitness(population);
 
 		// display
-		//i = 0;
+		i = 0;
 		//for(i = 0; i < POP_SIZE; i++)
-		for(i = 0; i < POP_SIZE/8; i++)
+		//for(i = 0; i < POP_SIZE/8; i++)
 		{
 			fprintf(stderr, "Geneation %d\tGenome %d\n", generation, i);
 

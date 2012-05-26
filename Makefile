@@ -12,3 +12,9 @@ rlc_ga_main:rlc_ga_fitting.c rlc_solver.c double_array.c
 
 double_array_test:double_array_test.c double_array.c double_array.h
 	cc double_array_test.c double_array.c -o double_array_test
+
+fitting:double_array.c double_array.h fitting.c rlc_solver.c rlc_solver.h
+	cc -lgaul -lgaul_util -lgsl -lgslcblas -Wl,--rpath -Wl,/usr/local/lib double_array.c fitting.c rlc_solver.c -o fitting
+
+fitting_char:double_array.c double_array.h fitting_char.c rlc_solver.c rlc_solver.h
+	cc -lgaul -lgaul_util -lgsl -lgslcblas -Wl,--rpath -Wl,/usr/local/lib double_array.c fitting_char.c rlc_solver.c -o fitting_char
