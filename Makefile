@@ -13,3 +13,6 @@ rlc_fitting:double_array.c double_array.h rlc_fitting.c rlc_solver.c rlc_solver.
 iw_fitting:double_array.c double_array.h iw_fitting.c
 	cc -lgaul -lgaul_util -Wl,--rpath -Wl,/usr/local/lib double_array.c iw_fitting.c -o iw_fitting
 
+
+ran_gen:ran_gen.c
+	cc ran_gen.c -o ran_gen

@@ -162,7 +162,7 @@ boolean fitting_generation_callback(int generation, population *pop)
 	double params_d[4];
 	chromo_translator((char*)(pop->entity_iarray[0]->chromosome[0]), params_d);
 
-	fprintf(stderr, "%d: E=%8.2lf\tR=%8.2lf\tL=%4.2lf\tC=%4.2lf\t\tFitness: %lf\n",
+	fprintf(stdout, "%d: E=%8.2lf\tR=%8.2lf\tL=%4.2lf\tC=%4.2lf\t\tFitness: %lf\n",
             generation,
             params_d[0],
             params_d[1],
