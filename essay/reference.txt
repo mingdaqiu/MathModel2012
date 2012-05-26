@@ -1,0 +1,5 @@
+参考文献
+C.L.Karr,B.Weck,D.L.Massart,P.Vankeerberghen.Least Median Squares Curve Fitting Using a Genetic Algorithm[J].The Great Britain：EngngApplic. Artif. lntell. 1995,Vol. 8, No. 2:177-189.
+Fujiichi Yoshimoto,Toshinobu Harada,Yoshihide Yoshimoto.Data Fitting with a Spline Using a Real-coded Genetic Algorithm[J].The United States：Computer-Aided Design, 2003,35:751-760. 
+Paul Horowitz, Winfield Hill.The art of electronics[M].The Great Britain：Cambridge University Press 
+赵凯华，陈熙谋.电磁学[M].北京：高等教育出版社
