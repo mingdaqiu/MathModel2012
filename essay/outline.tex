@@ -1,4 +1,5 @@
 \documentclass[a4paper]{article}
+\usepackage{amsmath}
 
 \usepackage{CJK}
 \begin{CJK*}{UTF8}{gbsn}
@@ -30,9 +31,71 @@
 
 %
 \section{使用遗传算法进行曲线拟合}
+
+根据问题的实际情况，我们一般知道电路的形状和具有的电子元件种类（但是不知道具体的元件
+参数，这是我需要我们进行确定的），因此，可以采用遗传算法的方式，在离散化的解空间进行搜索，
+通过曲线拟合的方式检验选取的元件参数是否符合我们的观测，以此达到近似确定元件参数的目的。
+
 \subsection{遗传算法的原理}
+
+遗传算法（Genetic Algorithm）是一类借鉴生物界的进化规律（适者生存，优胜劣汰遗传机制）
+演化而来的随机化搜索方法。它是由美国的J.Holland教授1975年首先提出，其主要特点是直接对结构对象进行操作，
+不存在求导和函数连续性的限定；具有内在的隐并行性和更好的全局寻优能力；采用概率化的寻优方法，能自动获取和指导优化的搜索空间
+，自适应地调整搜索方向，不需要确定的规则。
+
+遗传算法是从代表问题可能潜在的解集的一个种群（population）开始的，
+而一个种群则由经过基因（gene）编码的一定数目的个体(individual)组成。
+每个个体实际上是染色体(chromosome)带有特征的实体。染色体作为遗传物质的主要载体，
+即多个基因的集合，其内部表现（即基因型）是某种基因组合，它决定了个体的形状的外部表现，
+如黑头发的特征是由染色体中控制这一特征的某种基因组合决定的。因此，在一开始需要实现从表现型到基因型的映射即编码工作。
+由于仿照基因编码的工作很复杂，我们往往进行简化，如二进制编码，初代种群产生之后，按照适者生存和优胜劣汰的原理，
+逐代（generation）演化产生出越来越好的近似解，在每一代，根据问题域中个体的适应度（fitness）大小选择（selection）个体，
+并借助于自然遗传学的遗传算子（genetic operators）进行组合交叉（crossover）和变异（mutation），产生出代表新的解集的种群。
+这个过程将导致种群像自然进化一样的后生代种群比前代更加适应于环境，末代种群中的最优个体经过解码（decoding），可以作为问题近似最优解。
+
+
 \subsection{遗传算法的实现}
-\subsection{遗传算法的曲线拟合算法}
+
+针对问题我们需要对遗传算法进行具体的程序编写。考虑到遗传算法实际上并没有具体的实现方式，特别是其关键部分
+（如crossover,mutation）都可以有不同的实现方法，因此重新编写代码实现一个遗传算法
+代价太大。这里，我们采用 \emph{(Genetic Algorithm Utility Library)GAUL} 库提供的具体实现。
+
+\subsubsection{Genetc Algorithm Utility Library(GAUL)}
+Genetic Algorithm Utility
+Library(GAUL)是一个灵活的C语言编程库，目的是为了帮助开发以遗传算法等演化算法为基础的程序。
+\emph{GAUL}提供了遗传算法的核心框架，包括核心的数据类型和函数。它的灵活性表现在他可以轻松的
+修改为并行执行，并设置分布式计算以加快计算速度，同时可以通过选择不同的参数使用不同的演化模型。
+
+\subsection{程序的架构}
+在程序中使用\emph{GAUL}库，核心内容是选择适当的 \emph{chromosome}
+类型，实现将\emph{chromosome}翻译成问题的参数的翻译函数，并实现
+对于\emph{chromosome}的\emph{fittness}的计算函数。
+
+假设观测到的样本点是$(x_i, y_i)$,
+对于指定的 \emph{chromosome} 的相应目标函数是$T(x,
+\text{params})$，其中
+params 是由 \emph{chromosome} 翻译过来的参数。
+
+其中的函数$T$, 对应与程序中的函数
+\begin{verbatim}
+        double target_function(double x, double * params);
+\end{verbatim}
+
+对于这个问题，我们的\emph{fittness}取为负的方差
+\begin{equation}
+	\text{Fitness} = - \frac{\sum (y_i - T(x_i, \text{params}))}{\text{number of data points}} 
+\end{equation}
+对于应程序中的函数
+\begin{verbatim}
+        double fitting_score(population *pop, entity *entity);
+\end{verbatim}
+
+而将 chromosome 翻译为参数的翻译函数则需要针对具体问题具体确定。
+这对应与程序中的函数
+\begin{verbatim}
+        int chromo_translator(const char * params_c, double * params_d);
+\end{verbatim}
+
 
 \section{具体的电路问题的解决}
 
